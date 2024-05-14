@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
 #include <ctime>
 
 using namespace std;
@@ -72,8 +73,10 @@ vector<Card> initializeDeck(int numDecks) {
 		}
 	}
 
-	srand(static_cast<unsigned int>(time(0))); // seed random # gen
-	random_shuffle(deck.begin(), deck.end()); // shuffle the deck
+	// Use a random number generator to shuffle the deck
+	random_device rd; // Obtain a random seed from the OS entropy device
+	mt19937 rng(rd()); // Initialize the random number generator with the seed
+	shuffle(deck.begin(), deck.end(), rng); // Shuffle the deck using the random number generator
 	return deck;
 }
 
