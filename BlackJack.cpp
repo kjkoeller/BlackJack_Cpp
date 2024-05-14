@@ -1,5 +1,5 @@
 // Simple blackjack game with some basic logic
-// Created May 5, 2024
+// Created May 14, 2024
 // Created by: Kyle Koeller
 
 #include <iostream>
@@ -11,33 +11,33 @@ using namespace std;
 
 struct Card {
 	enum Suit { HEARTS, DIAMONDS, CLUBS, SPADES };
-	enum Rank {ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING};
+	enum Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
 
 	Suit suit;
 	Rank rank;
 
 	void print() const {
 		switch (rank) {
-			case ACE: cout << "Ace"; break;
-			case TWO: cout << "2"; break;
-			case THREE: cout << "3"; break;
-			case FOUR: cout << "4"; break;
-			case FIVE: cout << "5"; break;
-			case SIX: cout << "6"; break;
-			case SEVEN: cout << "7"; break;
-			case EIGHT: cout << "8"; break;
-			case NINE: cout << "9"; break;
-			case TEN: cout << "10"; break;
-			case JACK: cout << "10"; break;
-			case QUEEN: cout << "10"; break;
-			case KING: cout << "10"; break;
+		case ACE: cout << "Ace"; break;
+		case TWO: cout << "2"; break;
+		case THREE: cout << "3"; break;
+		case FOUR: cout << "4"; break;
+		case FIVE: cout << "5"; break;
+		case SIX: cout << "6"; break;
+		case SEVEN: cout << "7"; break;
+		case EIGHT: cout << "8"; break;
+		case NINE: cout << "9"; break;
+		case TEN: cout << "10"; break;
+		case JACK: cout << "10"; break;
+		case QUEEN: cout << "10"; break;
+		case KING: cout << "10"; break;
 		}
 
 		switch (suit) {
-			case HEARTS: cout << " of Hearts"; break;
-			case DIAMONDS: cout << " of Diamonds"; break;
-			case SPADES: cout << " of Spades"; break;
-			case CLUBS: cout << " of Clubs"; break;
+		case HEARTS: cout << " of Hearts"; break;
+		case DIAMONDS: cout << " of Diamonds"; break;
+		case SPADES: cout << " of Spades"; break;
+		case CLUBS: cout << " of Clubs"; break;
 		}
 	}
 };
@@ -203,7 +203,7 @@ bool playerWantsDoubleDown() {
 char getStrategyAdvice(const vector<Card>& playerHand, const Card& dealerCard) {
 	int playerValue = getHandValue(playerHand);
 	int dealerValue = getCardValue(dealerCard);
-	
+
 	if (playerValue >= 17) {
 		return 's';
 	}
@@ -309,105 +309,59 @@ int main() {
 
 			vector<vector<Card>> splitHands = { splitHand1, splitHand2 };
 			for (int i = 0; i < splitHands.size(); ++i) {
+				// Splitting cards logic
 				cout << "Playing split hand " << (i + 1) << endl;
 				playerHand = splitHands[i];
 
 				displayHands(playerHand, dealerhand, false);
 
 				while (true) {
-					char advice = getStrategyAdvice(playerHand, dealerhand[0]);
-					char choice;
-					// if the advice is to stand
-					if (advice == 's') {
-						cout << "\nPlayer should stand (s/h)";
-						cin >> choice;
-						// break if the player decides to stand
-						if (choice == 's' || choice == 'S') {
-							canDoubleDown = false;
-							break;
-						}
-						else if (choice == 'h' || choice == 'H') {
-							playerHand.push_back(dealCard(deck));
-							displayHands(playerHand, dealerhand, false);
-							canDoubleDown = false;
-
-							if (getHandValue(playerHand) >= 21) {
-								cout << "\nYou bust! Dealer Wins.\n" << endl;
-								break;
-							}
-						}
+					// determine if the player stands or hits
+					bool hit = playerDecision(playerHand, dealerhand, canDoubleDown);
+					if (!hit) {
+						// Player Stands
+						canDoubleDown = false;
+						break;
 					}
-					// if the advice is to hit
-					else if (advice == 'h') {
-						cout << "\nPleayer should hit (s/h)";
-						cin >> choice;
-						// break if the player decides to stand
-						if (choice == 's' || choice == 'S') {
-							canDoubleDown = false;
-							break;
-						}
-						else if (choice == 'h' || choice == 'H') {
-							playerHand.push_back(dealCard(deck));
-							displayHands(playerHand, dealerhand, false);
-							canDoubleDown = false;
+					else {
+						// Player hits
+						playerHand.push_back(dealCard(deck));
+						displayHands(playerHand, dealerhand, false);
+						canDoubleDown = false;
 
-							if (getHandValue(playerHand) >= 21) {
-								cout << "\nYou bust! Dealer Wins.\n" << endl;
-								break;
-							}
+						if (getHandValue(playerHand) >= 21) {
+							// Player busts
+							break;
 						}
 					}
 				}
 			}
-		} 
+		}
 		else if (canDoubleDown && playerWantsDoubleDown()) {
+			// Double down logic
 			cout << "\n\nPlayer doubles down.\n" << endl;
 			playerHand.push_back(dealCard(deck));
 			displayHands(playerHand, dealerhand, false);
 			canDoubleDown = false;
 		}
 		else {
+			// Logic for when the player decided to not split or double down
 			while (true) {
-				char advice = getStrategyAdvice(playerHand, dealerhand[0]);
-				char choice;
-				// if the advice is to stand
-				if (advice == 's') {
-					cout << "\nPlayer should stand (s/h)";
-					cin >> choice;
-					// break if the player decides to stand
-					if (choice == 's' || choice == 'S') {
-						canDoubleDown = false;
-						break;
-					}
-					else if (choice == 'h' || choice == 'H') {
-						playerHand.push_back(dealCard(deck));
-						displayHands(playerHand, dealerhand, false);
-						canDoubleDown = false;
-
-						if (getHandValue(playerHand) >= 21) {
-							cout << "\nYou bust! Dealer Wins.\n" << endl;
-							break;
-						}
-					}
+				bool hit = playerDecision(playerHand, dealerhand, canDoubleDown);
+				if (!hit) {
+					// Player stands
+					canDoubleDown = false;
+					break;
 				}
-				// if the advice is to hit
-				else if (advice == 'h') {
-					cout << "\nPleayer should hit (s/h)";
-					cin >> choice;
-					// break if the player decides to stand
-					if (choice == 's' || choice == 'S') {
-						canDoubleDown = false;
-						break;
-					}
-					else if (choice == 'h' || choice == 'H') {
-						playerHand.push_back(dealCard(deck));
-						displayHands(playerHand, dealerhand, false);
-						canDoubleDown = false;
+				else {
+					// Player hits
+					playerHand.push_back(dealCard(deck));
+					displayHands(playerHand, dealerhand, false);
+					canDoubleDown = false;
 
-						if (getHandValue(playerHand) >= 21) {
-							cout << "\n\nYou bust! Dealer Wins.\n\n" << endl;
-							break;
-						}
+					if (getHandValue(playerHand) >= 21) {
+						// Player busts
+						break;
 					}
 				}
 			}
