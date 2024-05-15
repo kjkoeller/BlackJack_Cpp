@@ -1,5 +1,5 @@
 // Simple blackjack game with some basic logic
-// Created May 14, 2024
+// Created May 15, 2024
 // Created by: Kyle Koeller
 
 #include <iostream>
@@ -84,7 +84,7 @@ Card dealCard(vector<Card>& deck) {
 	// if the deck is empty initialize a new deck
 	if (deck.empty()) {
 		cout << "\n\nDeck is empty. Reshuffling...\n\n" << endl;
-		deck = initializeDeck(4);
+		deck = initializeDeck(7);
 	}
 
 	// after a card is picked and returned, remove that card from the deck
@@ -167,7 +167,7 @@ bool playerWantsSplit() {
 	char choice;
 
 	while (true) {
-		cout << "Do you want to split? (y/n): ";
+		cout << "\nDo you want to split? (y/n): ";
 		cin >> choice;
 
 		if (choice == 'y' || choice == 'Y') {
@@ -177,7 +177,7 @@ bool playerWantsSplit() {
 			return false;
 		}
 		else {
-			cout << "Invalid input. Please enter 'y' to split or 'n' to continue." << endl;
+			cout << "\nInvalid input. Please enter 'y' to split or 'n' to continue.\n" << endl;
 		}
 	}
 }
@@ -187,7 +187,7 @@ bool playerWantsDoubleDown() {
 	char choice;
 
 	while (true) {
-		cout << "Do you want to double down? (y/n): ";
+		cout << "\nDo you want to double down? (y/n): ";
 		cin >> choice;
 
 		if (choice == 'y' || choice == 'Y') {
@@ -197,7 +197,7 @@ bool playerWantsDoubleDown() {
 			return false;
 		}
 		else {
-			cout << "Invalid input. Please enter 'y' to split or 'n' to continue." << endl;
+			cout << "\nInvalid input. Please enter 'y' to split or 'n' to continue.\n" << endl;
 		}
 	}
 }
@@ -268,7 +268,7 @@ bool playerDecision(const vector<Card>& playerHand, const vector<Card>& dealerHa
 			return true; // Hit
 		}
 		else {
-			cout << "Invalid input. Please enter 's' to stand or 'h' to hit." << endl;
+			cout << "\nInvalid input. Please enter 's' to stand or 'h' to hit.\n" << endl;
 		}
 	}
 }
@@ -278,7 +278,7 @@ int main() {
 	int losses = 0;
 	int ties = 0;
 
-	vector<Card> deck = initializeDeck(4);
+	vector<Card> deck = initializeDeck(7);
 
 	while (true) {
 		vector<Card> playerHand;
@@ -286,6 +286,7 @@ int main() {
 		bool canDoubleDown = true;
 		bool blackJack = false;
 		bool dealer21 = false;
+		bool bust = false;
 
 		playerHand.push_back(dealCard(deck));
 		dealerhand.push_back(dealCard(deck));
@@ -301,12 +302,13 @@ int main() {
 		}
 		else if (getHandValue(dealerhand) == 21) {
 			cout << "\nDealer has 21!\n" << endl;
-			displayHands(playerHand, dealerhand, true);
 			canDoubleDown = false;
 			dealer21 = true;
 		}
 		else if (playerHand[0].rank == playerHand[1].rank && playerWantsSplit()) {
-			cout << "Player wants to split." << endl;
+			// Logic for splitting cards into two hands, only works on the first 2 cards. 
+			// If the split cards could be split in real life, there is not an option to split those
+			cout << "\nPlayer wants to split.\n" << endl;
 			vector<Card> splitHand1 = { playerHand[0], dealCard(deck) };
 			vector<Card> splitHand2 = { playerHand[1], dealCard(deck) };
 
@@ -332,8 +334,13 @@ int main() {
 						displayHands(playerHand, dealerhand, false);
 						canDoubleDown = false;
 
-						if (getHandValue(playerHand) >= 21) {
+						if (getHandValue(playerHand) > 21) {
 							// Player busts
+							cout << "\nPlayer busts.\n" << endl;
+							bust = true;
+							break;
+						}
+						if (getHandValue(playerHand) == 21) {
 							break;
 						}
 					}
@@ -342,10 +349,15 @@ int main() {
 		}
 		else if (canDoubleDown && playerWantsDoubleDown()) {
 			// Double down logic
-			cout << "\n\nPlayer doubles down.\n" << endl;
+			cout << "\nPlayer doubles down.\n" << endl;
 			playerHand.push_back(dealCard(deck));
-			displayHands(playerHand, dealerhand, false);
 			canDoubleDown = false;
+
+			if (getHandValue(playerHand) > 21) {
+				// Player busts
+				cout << "\nPlayer busts.\n" << endl;
+				bust = true;
+			}
 		}
 		else {
 			// Logic for when the player decided to not split or double down
@@ -362,14 +374,22 @@ int main() {
 					displayHands(playerHand, dealerhand, false);
 					canDoubleDown = false;
 
-					if (getHandValue(playerHand) >= 21) {
+					if (getHandValue(playerHand) > 21) {
 						// Player busts
+						cout << "\nPlayer busts.\n" << endl;
+						bust = true;
+						cout << bust << endl;
+						break;
+					}
+					if (getHandValue(playerHand) == 21) {
 						break;
 					}
 				}
 			}
 		}
-		if (!dealer21) {
+		// if the dealer does not have 21 on first 2 cards or the player did not bust
+		if (!dealer21 || !bust) {
+			cout << bust + 1 << endl;
 			// no reason for the dealer to keep hitting if the player got Black Jack
 			if (!blackJack) {
 				// keep hitting until the dealer gets to 17 or goes above 17
@@ -393,7 +413,9 @@ int main() {
 				ties++;
 			}
 		}
+		//  if the dealer has 21 on first two cards or the plyer busts the dealer wins
 		else {
+			displayHands(playerHand, dealerhand, true);
 			cout << "Dealer wins.\n" << endl;
 			losses++;
 		}
