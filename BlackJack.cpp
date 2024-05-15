@@ -11,52 +11,55 @@
 using namespace std;
 
 struct Card {
-	enum Suit { HEARTS, DIAMONDS, CLUBS, SPADES };
-	enum Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
+	enum class Suit { HEARTS, DIAMONDS, CLUBS, SPADES };
+	enum class Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
 
 	Suit suit;
 	Rank rank;
 
 	void print() const {
 		switch (rank) {
-		case ACE: cout << "Ace"; break;
-		case TWO: cout << "2"; break;
-		case THREE: cout << "3"; break;
-		case FOUR: cout << "4"; break;
-		case FIVE: cout << "5"; break;
-		case SIX: cout << "6"; break;
-		case SEVEN: cout << "7"; break;
-		case EIGHT: cout << "8"; break;
-		case NINE: cout << "9"; break;
-		case TEN: cout << "10"; break;
-		case JACK: cout << "10"; break;
-		case QUEEN: cout << "10"; break;
-		case KING: cout << "10"; break;
+			case Rank::ACE: cout << "Ace"; break;
+			case Rank::TWO: cout << "2"; break;
+			case Rank::THREE: cout << "3"; break;
+			case Rank::FOUR: cout << "4"; break;
+			case Rank::FIVE: cout << "5"; break;
+			case Rank::SIX: cout << "6"; break;
+			case Rank::SEVEN: cout << "7"; break;
+			case Rank::EIGHT: cout << "8"; break;
+			case Rank::NINE: cout << "9"; break;
+			case Rank::TEN: cout << "10"; break;
+			case Rank::JACK: cout << "10"; break;
+			case Rank::QUEEN: cout << "10"; break;
+			case Rank::KING: cout << "10"; break;
 		}
 
 		switch (suit) {
-		case HEARTS: cout << " of Hearts"; break;
-		case DIAMONDS: cout << " of Diamonds"; break;
-		case SPADES: cout << " of Spades"; break;
-		case CLUBS: cout << " of Clubs"; break;
+			case Suit::HEARTS: cout << " of Hearts"; break;
+			case Suit::DIAMONDS: cout << " of Diamonds"; break;
+			case Suit::SPADES: cout << " of Spades"; break;
+			case Suit::CLUBS: cout << " of Clubs"; break;
 		}
 	}
 };
 
 int getRandomNumber(int min, int max) {
-	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
-	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+	static random_device rd;
+	static mt19937 rng(rd());
+	uniform_int_distribution<int> uni(min, max);
+
+	return uni(rng);
 }
 
 int getCardValue(const Card& card) {
 	switch (card.rank) {
-	case Card::JACK:
-	case Card::QUEEN:
-	case Card::KING:
+	case Card::Rank::JACK:
+	case Card::Rank::QUEEN:
+	case Card::Rank::KING:
 		return 10;
-	case Card::ACE:
+	case Card::Rank::ACE:
 		return 11;
-	default:
+	default: 
 		return static_cast<int>(card.rank);
 	}
 }
@@ -65,8 +68,8 @@ vector<Card> initializeDeck(int numDecks) {
 	vector<Card> deck;
 	// create the deck of cards from the number of decks 
 	for (int deckCount = 0; deckCount < numDecks; ++deckCount) {
-		for (int suit = Card::HEARTS; suit <= Card::SPADES; ++suit) {
-			for (int rank = Card::ACE; rank <= Card::KING; ++rank) {
+		for (int suit = static_cast<int>(Card::Suit::HEARTS); suit <= static_cast<int>(Card::Suit::SPADES); ++suit) {
+			for (int rank = static_cast<int>(Card::Rank::ACE); rank <= static_cast<int>(Card::Rank::KING); ++rank) {
 				deck.push_back({ static_cast<Card::Suit>(suit), static_cast<Card::Rank>(rank) });
 			}
 
@@ -88,7 +91,7 @@ Card dealCard(vector<Card>& deck) {
 	}
 
 	// after a card is picked and returned, remove that card from the deck
-	int index = getRandomNumber(0, deck.size() - 1);
+	int index = getRandomNumber(0, static_cast<int>(deck.size()) - 1);
 	Card card = deck[index];
 	deck.erase(deck.begin() + index);
 
