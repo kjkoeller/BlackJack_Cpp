@@ -378,7 +378,6 @@ int main() {
 						// Player busts
 						cout << "\nPlayer busts.\n" << endl;
 						bust = true;
-						cout << bust << endl;
 						break;
 					}
 					if (getHandValue(playerHand) == 21) {
@@ -389,7 +388,6 @@ int main() {
 		}
 		// if the dealer does not have 21 on first 2 cards or the player did not bust
 		if (!dealer21 || !bust) {
-			cout << bust + 1 << endl;
 			// no reason for the dealer to keep hitting if the player got Black Jack
 			if (!blackJack) {
 				// keep hitting until the dealer gets to 17 or goes above 17
