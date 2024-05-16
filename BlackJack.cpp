@@ -138,7 +138,7 @@ int getHandValue(const vector<Card>& hand) {
 
 // displays the hands of the player and the dealer, can be optional to reveal both dealer cards
 void displayHands(const vector<Card>& playerHand, const vector<Card>& dealerHand, bool showDealerCard) {
-	cout << "Your Hand: ";
+	cout << "\nYour Hand: ";
 	for (const auto& card : playerHand) {
 		card.print();
 		cout << ", ";
@@ -280,16 +280,36 @@ int main() {
 	int wins = 0;
 	int losses = 0;
 	int ties = 0;
+	const int MIN_BET = 10;
+	const int MAX_BET = 100;
+	int balance = 100;
 
 	vector<Card> deck = initializeDeck(7);
 
 	while (true) {
+		if (balance <= 0) {
+			cout << "\n\nYou have run out of money.\n\n" << endl;
+			break;
+		}
+		int betAmount;
+		cout << "Current Balance: " << balance << endl;
+		cout << "Place your bet (minimum: " << MIN_BET << " , maximum: " << MAX_BET << "): ";
+		cin >> betAmount;
+
+		if (betAmount < MIN_BET || betAmount > MAX_BET) {
+			cout << "Invalid bet amount. Please enter a bet amount between " << MIN_BET << " and " << MAX_BET << "." << endl;
+			continue;
+		}
+
+		balance -= betAmount;
+
 		vector<Card> playerHand;
 		vector<Card> dealerhand;
 		bool canDoubleDown = true;
 		bool blackJack = false;
 		bool dealer21 = false;
 		bool bust = false;
+		bool didDoubleDown = false;
 
 		playerHand.push_back(dealCard(deck));
 		dealerhand.push_back(dealCard(deck));
@@ -355,6 +375,9 @@ int main() {
 			cout << "\nPlayer doubles down.\n" << endl;
 			playerHand.push_back(dealCard(deck));
 			canDoubleDown = false;
+			didDoubleDown = true;
+			balance -= betAmount;
+			cout << balance << endl;
 
 			if (getHandValue(playerHand) > 21) {
 				// Player busts
@@ -408,10 +431,25 @@ int main() {
 			else if (result == 1) {
 				cout << "\nPleayer wins.\n" << endl;
 				wins++;
+				if (didDoubleDown) {
+					balance += betAmount * 4;
+				}
+				else if (blackJack) {
+					balance += betAmount * 1.5; // black jack pays out 3:2
+				}
+				else {
+					balance += betAmount * 2;
+				}
 			}
 			else {
 				cout << "\nResult is a push between dealer and player.\n" << endl;
 				ties++;
+				if (didDoubleDown) {
+					balance += betAmount * 2;
+				}
+				else {
+					balance += betAmount;
+				}
 			}
 		}
 		//  if the dealer has 21 on first two cards or the plyer busts the dealer wins
